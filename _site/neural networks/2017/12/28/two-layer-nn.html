@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Two layer NN - Numpy Implementation - MNIST Classifier</title>
+  <meta name="description" content="When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html">
+  <link rel="alternate" type="application/rss+xml" title="Mike James - I had a bit of spare time.." href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Mike James - I had a bit of spare time..</a>
+  
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          
+            
+            
+            <a class="page-link" href="/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Two layer NN - Numpy Implementation - MNIST Classifier</h1>
+    <p class="post-meta">
+      <time datetime="2017-12-28T19:00:24+00:00" itemprop="datePublished">
+        
+        Dec 28, 2017
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p><strong>When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)</strong></p>
+
+<p>When I was completing my masters all equations and transformations had to be intimately understood in order to form any kind of working implementation of a machine learning algorithm.</p>
+
+<p>TensorFlow is a great tool and im glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.</p>
+
+<p>While I dont plan to go into the mathematics here, in this post I will create a simple 2 layer neural network (with backprop) and use it to classify the MNIST dataset. In order to give some intuition as to what is going on behind the scenes with tensorflow.</p>
+
+<p>The code is available from my Github.
+I’ll do my best to keep it in a single file and explain as much as possible.</p>
+
+<p><br /><br /><br /></p>
+
+<h2 id="step-1-import-data">Step 1: Import Data</h2>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">mnist</span> <span class="n">import</span> <span class="no">MNIST</span>
+<span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
+<span class="n">import</span> <span class="n">matplotlib</span><span class="p">.</span><span class="nf">pyplot</span> <span class="n">as</span> <span class="n">plt</span> 
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span></code></pre></figure>
+
+<p>These are all the libraries we will be using for today.
+The mnist library allows us to extract the MNIST dataset from the zipped files 
+Numpy is the de-facto standard for Machine Learning “tensor” (vector) manipulation.
+MatplotLib will allow us to visualise our data
+The last line simply tells us to display our plots inline</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">data</span> <span class="o">=</span> <span class="no">MNIST</span><span class="p">(</span><span class="s1">'../data'</span><span class="p">)</span>
+<span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nf">load_training</span><span class="p">()</span>
+<span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nf">load_testing</span><span class="p">()</span>
+
+<span class="n">train_images</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">train_images</span><span class="p">)</span>
+<span class="n">train_labels</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span>
+<span class="n">test_images</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">test_images</span><span class="p">)</span>
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">test_labels</span><span class="p">)</span></code></pre></figure>
+
+<p>This allows us to import the MNIST dataset from using the mnist libry, This will automatically extract the data from the zipped files and load the images and labels into memory.</p>
+
+<p><br /><br /><br /></p>
+
+<h2 id="step-2-data-and-pre-processing">Step 2: Data and pre-processing</h2>
+
+<p>We can run some checks on this data to make sure it’s as we expect.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">## Sanity check</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"analyse loaded data:</span><span class="se">\n</span><span class="s2"> "</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">" Training images - {}</span><span class="se">\n</span><span class="s2"> Training labels - {}"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">len</span><span class="p">(</span><span class="n">train_images</span><span class="p">),</span> <span class="n">len</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)))</span> 
+<span class="nb">print</span><span class="p">(</span><span class="s2">" Test images - {}</span><span class="se">\n</span><span class="s2"> Test labels - {}"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">len</span><span class="p">(</span><span class="n">test_images</span><span class="p">),</span> <span class="n">len</span><span class="p">(</span><span class="n">test_labels</span><span class="p">)))</span> 
+
+<span class="c1">## train labels are stored as a single vector with the number corisponding to which digit the image is</span>
+<span class="c1">## test labels are stored as a 784 index 1d array</span>
+
+
+<span class="c1"># visualise image data</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">60000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sample</span> <span class="k">in</span> <span class="n">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">asarray</span><span class="p">(</span><span class="n">train_images</span><span class="p">[</span><span class="n">sample</span><span class="p">]).</span><span class="nf">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">train_labels</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'gray'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="s1">'label = {}'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">axis</span><span class="p">(</span><span class="s1">'off'</span><span class="p">)</span>
+    </code></pre></figure>
+
+<p>The output should be similar to what is shown below.. however the numbers will not be identical because they are randomly chosen.
+<br /><br />
+<img src="/images/img/2017/12/sample-digits.png" alt="graph" /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># make labels one-hot</span>
+
+<span class="n">train_labels</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)</span>
+
+<span class="n">train_labels_v</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="mi">60000</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">train_labels_v</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">60000</span><span class="p">),</span> <span class="n">train_labels</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">test_labels</span><span class="p">)</span>
+
+<span class="n">test_labels_v</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="mi">10000</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">test_labels_v</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">10000</span><span class="p">),</span> <span class="n">test_labels</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span></code></pre></figure>
+
+<p>We want to make our vectors one-hot encoded.. one hot encoding means that we represent each of the available classes in our dataset with one long array. The length of this array is equal to the number of classes we have to choose from.</p>
+
+<p>The values in this array are all set equal to zero, the class which correctly classifies a particular sample will be set to 1.</p>
+
+<p>In the above, we make an array with the same number rows as we have sample images. Each row will have 10 columns, the same number of columns as we have classes. 10 columns represent numbers 0-9.</p>
+
+<p>We then iterate through each of our newly made vectors and for each row in our sample data set (60000 for train and 10000 for test) we take the label index( which will be a number from 0-9) and set the value at that position in the array to to 1.</p>
+
+<p><br /><br /><br /></p>
+<h2 id="step-3-define-network-model">Step 3: Define network model</h2>
+
+<p>OK.. ready..</p>
+
+<p>first things first we create a class to encapsulate our model and its parameters, ive called it NNModel (Neural Network Model).</p>
+
+<p>This model take 3 initialization parametars:
+input_sz - the number of input images in the current batch for (10000 for test batch)
+hidden_sz - the number of neurones in the hidden layer
+output_sz - the number of classes to map to
+<br /><br /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">NNModel</span><span class="p">:</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">input_sz</span><span class="p">,</span> <span class="n">hidden_sz</span><span class="p">,</span> <span class="n">output_sz</span><span class="p">,</span><span class="n">weightInitFcn</span><span class="o">=</span><span class="no">None</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+       	<span class="nb">self</span><span class="o">.</span><span class="no">W1</span> <span class="o">=</span> <span class="n">std</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">randn</span><span class="p">(</span><span class="n">input_sz</span><span class="p">,</span> <span class="n">output_sz</span><span class="p">)</span> 
+       	<span class="nb">self</span><span class="p">.</span><span class="nf">b1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">output_sz</span><span class="p">)</span> </code></pre></figure>
+
+<p><br />
+within the initialization class we initialize the weights W1 and the bias B1 as parameters, making them class variables using the ‘self.’ prefix.</p>
+
+<p>*W1 is 2d matrix with dimensions [input_sz * output_sz]
+*b1 is 1d column vector of length output_sz</p>
+
+<p>The calc_loss method is going to hold the bulk of our ML logic,
+for brevity and out of laziness, I’ve put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.</p>
+
+<p>Lets look at the forward pass first:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">calc_loss</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_gt</span><span class="p">,</span> <span class="n">reg</span><span class="p">):</span>
+
+    <span class="c1">#forward pass</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="no">W1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">self</span><span class="p">.</span><span class="nf">b1</span>
+        </code></pre></figure>
+
+<p>Very simply, we take x and calculate the dot product between it and out weights matrix initialised earlier, we then add the bias to ths to produce a1.
+a1 is essentially our best guess, given each image, of what number this image depicts (which class 0-9 it belongs to)</p>
+
+<p><br /><br /><br /></p>
+<h2 id="step-4-loss">Step 4: Loss</h2>
+
+<h4 id="41---define-loss-metrics"><strong>4.1 - Define loss metrics</strong></h4>
+<p>We need to calculate the loss associated with that forward pass, i.e how (in)accurate are our predictions.</p>
+
+<p>In order to do this we will use two functions, the first is the <strong>Softmax</strong> function.
+<br /><br /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">softmax</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">scores</span><span class="p">):</span>
+    <span class="n">scores</span> <span class="o">-=</span> <span class="n">np</span><span class="p">.</span><span class="nf">max</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="no">True</span><span class="p">)</span>
+    <span class="n">e_scores</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">e_scores</span><span class="o">/</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">e_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="no">True</span><span class="p">)</span> </code></pre></figure>
+
+<p><br />
+The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probabiility because all values are positive and together sum to 1.</p>
+
+<p>Next we calculate the cross entropy loss with respect to our data.
+<br /><br /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">c_e_loss</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="no">N</span> <span class="o">=</span> <span class="n">probs</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">probs</span><span class="p">[</span><span class="n">range</span><span class="p">(</span><span class="no">N</span><span class="p">),</span> <span class="n">labels</span><span class="p">]))</span> <span class="o">/</span> <span class="no">N</span><span class="p">)</span></code></pre></figure>
+
+<p><br />
+The <strong>Cross entropy</strong> loss is defined as the negative log likelihood [[MORE]]</p>
+
+<p>once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
+This is so called ‘L2 Regularization’ and essentially means that if the same function is represented by a higher order and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm, which is in turn added to the overall loss, the lower order function will be prefered.</p>
+
+<p>The loss calculation section of our forward pass is shown below
+<br /><br /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#loss calculation	</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+
+<span class="n">data_loss</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">c_e_loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y_gt</span><span class="p">)</span>
+<span class="n">reg_loss</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">reg</span> <span class="o">*</span><span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="no">W1</span><span class="o">*</span><span class="nb">self</span><span class="o">.</span><span class="no">W1</span><span class="p">)</span>       
+<span class="n">loss</span> <span class="o">=</span> <span class="n">data_loss</span> <span class="o">+</span> <span class="n">reg_loss</span></code></pre></figure>
+
+<p><br /></p>
+<h4 id="42---backpropagation"><strong>4.2 - Backpropagation</strong></h4>
+
+<p>Finally we need to backpropagate in order to update our weights and adjust them such that the next time we make a prediction, it will slightly better than what we have estimated previously.</p>
+
+<p>In order to do this we need to understand how much effect each value used, at each stage of our forward pass, had on our final outcome. Once we know this we can adjust these values in a way that will minimise the loss incurred.</p>
+
+<p>The code for the backward pass (backpropagation) is shown below.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#backward pass  -- gradient</span>
+<span class="n">dscores</span> <span class="o">=</span> <span class="n">probabilities</span>
+<span class="n">dscores</span><span class="p">[</span><span class="n">range</span><span class="p">(</span><span class="no">N</span><span class="p">),</span> <span class="n">y_gt</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+<span class="n">dscores</span> <span class="o">/=</span> <span class="no">N</span>
+
+<span class="n">db1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">dscores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">dw1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="no">T</span><span class="p">,</span> <span class="n">dscores</span><span class="p">)</span>
+<span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="n">dscores</span><span class="p">,</span> <span class="nb">self</span><span class="o">.</span><span class="no">W1</span><span class="o">.</span><span class="no">T</span><span class="p">)</span></code></pre></figure>
+
+<p>Because we only have one set of weights, really we only need to calculate the loss with respect to self.W1 and self.b1, however if this network were any deeper we would use the loss with respect to x as a parameter to calculate the loss with respect to earlier layers.</p>
+
+<p>The process of finding calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.</p>
+
+<p><br /><br /><br /></p>
+<h2 id="step-5-train-our-model">Step 5: Train our model!</h2>
+
+<p>This is the Iterative part of the process eluded to in the previous paragraph</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_gt</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mi">5</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">):</span>
+    <span class="n">num_train</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">its_per_epoch</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">num_train</span><span class="o">/</span><span class="n">iterations</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">loss_history</span> <span class="o">=</span> <span class="p">[]</span>
+        
+    <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>     
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="n">num_train</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">)</span>
+
+        <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
+        <span class="n">y_gt_batch</span> <span class="o">=</span> <span class="n">y_gt</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
+            
+        <span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">calc_loss</span><span class="p">(</span><span class="n">x_batch</span><span class="p">,</span> <span class="n">y_batch</span><span class="p">,</span> <span class="n">y_gt_batch</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+        <span class="n">loss_history</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+        <span class="nb">self</span><span class="o">.</span><span class="no">W1</span> <span class="o">+=</span> <span class="o">-</span><span class="n">lr</span> <span class="o">*</span> <span class="n">grads</span><span class="p">[</span><span class="s1">'W1'</span><span class="p">]</span>
+        <span class="nb">self</span><span class="p">.</span><span class="nf">b1</span> <span class="o">+=</span> <span class="o">-</span><span class="n">lr</span> <span class="o">*</span> <span class="n">grads</span><span class="p">[</span><span class="s1">'b1'</span><span class="p">]</span>
+            
+        <span class="c1">#if it % its_per_epoch == 0:</span>
+        <span class="c1">#print something</span>
+            
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">'loss_history'</span> <span class="p">:</span> <span class="n">loss_history</span>
+    <span class="p">}</span></code></pre></figure>
+
+<p>Instead of trying to update all the weights of all the samples in what could be a dataset of millions of points we perform ‘stocastic’ gradient descent. Where we take a random subset of the samples and adjust the weights based on the results of our predictions on this subset.</p>
+
+<p>Each subset is called a batch, you can see that we pass a batch of images and its corrisponding labels to the calc_loss function and based on those results we update our weights.</p>
+
+<p>We are returning our loss as well as the gradient so that we can plot our loss per iteration on a graph and make inferences based on its shape.</p>
+
+<p><br /><br /><br /></p>
+<h2 id="test-finally">TEST <em>(Finally)</em></h2>
+
+<p>Once we’ve finished training our model we use the predict function, on our test dataset to see how accurately we can predict each example image.</p>
+
+<p>The code below runs performs training and test on the model defined above, the outcome is shown in the plot below.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#use model on dataset</span>
+
+<span class="c1"># model params</span>
+<span class="n">input_size</span> <span class="o">=</span> <span class="mi">784</span>
+<span class="n">hidden_size</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">output_size</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="n">iterations</span> <span class="o">=</span> <span class="mi">500</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="no">FFNNModel</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">(</span><span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels_v</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">iterations</span><span class="p">)</span>
+
+<span class="c1">#validation_res = model.predict(validation_images)</span>
+<span class="n">test_res</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">test_images</span><span class="p">)</span>
+<span class="c1">#review validation results</span>
+<span class="c1">#--- here ---#</span>
+<span class="c1">#accuracy = np.equal(test_res[np.arange(test_labels.shape[0]), test_labels_v] == 1)</span>
+<span class="n">accuracy</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_res</span> <span class="o">==</span> <span class="n">test_labels</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">accuracy</span><span class="p">)</span>
+<span class="c1">#test model</span>
+
+<span class="c1">#review test results</span>
+<span class="c1">#--- here ---#</span>
+<span class="c1">#print(stats)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">'loss_history'</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="s1">'its'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span></code></pre></figure>
+
+<p><img src="/images/img/2017/12/error-per-iteration.png" alt="graph" /></p>
+
+<h4 id="this-simple-model-is-able-to-achieve-around-90-accuracy">This simple model is able to achieve around 90% accuracy!</h4>
+
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Mike James - I had a bit of spare time..</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Mike James - I had a bit of spare time..
+            
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/MikeJay-ctrl"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">MikeJay-ctrl</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Im always exploring new areas of Software Engineering and Computer Science. So from now on.. Whenever I have a bit of spare time, ill do a quick post and explore some of the themes here.
+Be sure to check back, when you get some time of your own.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

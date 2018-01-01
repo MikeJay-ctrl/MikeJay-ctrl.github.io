@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Two Layer Convolutional NN - Numpy Implementation</title>
+  <meta name="description" content="I recently did an implementation of a single layer Neural Network with backprop to classify the MNIST dataset">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4444/neural%20networks/2017/12/30/2-layer-convnet.html">
+  <link rel="alternate" type="application/rss+xml" title="Mike James - I had a bit of spare time.." href="/feed.xml">
+  
+  
+</head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper">
+    
+    
+    <a class="site-title" href="/">Mike James - I had a bit of spare time..</a>
+  
+    
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+              <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+              <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          
+            
+            
+            <a class="page-link" href="/about/">About</a>
+            
+          
+            
+            
+          
+            
+            
+          
+            
+            
+          
+        </div>
+      </nav>
+    
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Two Layer Convolutional NN - Numpy Implementation</h1>
+    <p class="post-meta">
+      <time datetime="2017-12-30T08:00:24+00:00" itemprop="datePublished">
+        
+        Dec 30, 2017
+      </time>
+      </p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>I recently did an implementation of a single layer Neural Network with backprop to classify the MNIST dataset</p>
+
+<p>You can find that post <a href="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html">here</a></p>
+
+<p>These days single layer networks are of limited use, deeper and more complex networks like the CNN are used to achieve lower errors and higher accuracy in image processing tasks.</p>
+
+<p>In this post i will implement a CNN using just numpy.</p>
+
+<p>The code does run and is verified as working correctly.. <strong>however the backpropagation is completely Naieve, unoptimised.. and for illustrative purposes only. It will take far too long to run on any real data.</strong></p>
+
+<p>Once again, The code is available from my Github and I’ll do my best to keep it in a single file and explain as much as possible.</p>
+
+<p>If you’ve read my previous post steps 1 and 2 will look familiar.</p>
+
+<p><br /><br /><br /></p>
+
+<h2 id="step-1-import-data">Step 1: Import Data</h2>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">from</span> <span class="n">mnist</span> <span class="n">import</span> <span class="no">MNIST</span>
+<span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
+<span class="n">import</span> <span class="n">matplotlib</span><span class="p">.</span><span class="nf">pyplot</span> <span class="n">as</span> <span class="n">plt</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="no">MNIST</span><span class="p">(</span><span class="s1">'../data'</span><span class="p">)</span>
+<span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nf">load_training</span><span class="p">()</span>
+<span class="n">test_images</span><span class="p">,</span> <span class="n">test_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nf">load_testing</span><span class="p">()</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">## sanity check </span>
+<span class="c1">#check the data was imported correctly as usual</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">' Number of training images - {}\n Number of training labels - {}'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">len</span><span class="p">(</span><span class="n">train_images</span><span class="p">),</span> <span class="n">len</span><span class="p">(</span><span class="n">train_labels</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">' Number of test images -{}\n Number of test labels - {}'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">len</span><span class="p">(</span><span class="n">test_images</span><span class="p">),</span> <span class="n">len</span><span class="p">(</span><span class="n">test_labels</span><span class="p">)))</span></code></pre></figure>
+
+<ul>
+  <li>Number of training images - 60000</li>
+  <li>Number of training labels - 60000</li>
+  <li>Number of test images -10000</li>
+  <li>Number of test labels - 10000</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">## Visualise the data</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">60000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sample</span> <span class="k">in</span> <span class="n">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">asarray</span><span class="p">(</span><span class="n">train_images</span><span class="p">[</span><span class="n">sample</span><span class="p">]).</span><span class="nf">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">train_labels</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span>
+    
+    <span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">'gray'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">axis</span><span class="p">(</span><span class="s1">'off'</span><span class="p">)</span></code></pre></figure>
+
+<p><img src="/images/img/2017/12/cnn-sample-digits.png" alt="sample images" /></p>
+
+<p><br /><br /><br /></p>
+
+<h2 id="step-1-data-and-preprocessing">Step 1: Data and Preprocessing</h2>
+
+<p>The data we have contains the raw pixel values for the images we need however in the above you notice that the array needed to be reshaped in order to display the image according to its actual visual representation.</p>
+
+<p>Currently the train images exist in a 2d vector of shape 6000 * 784 however CNN’s attempt to interpret not only pixel values but the spacial relationships that exist within a given image. This means that in order to make this data suitable for input to the CNN we need to input each image as a 28 * 28 dimensional array. The 28 * 28 pixels refer to the width and height (in pixels) of each image, that is the number of elements in each row and column of the matrix.</p>
+
+<p>The conversion is done below.</p>
+
+<p><br /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#image data is fine but the arrays are fine but are in the wrong shape... </span>
+<span class="c1">#images are currently in a long row vector need to have spacial information for cnn to be effective </span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'initially shape of image data was - {}'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">asarray</span><span class="p">(</span><span class="n">train_images</span><span class="p">).</span><span class="nf">shape</span><span class="p">))</span> <span class="c1">#60000 * 784</span>
+
+<span class="c1">#first change to NP array</span>
+<span class="n">train_data</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">train_images</span><span class="p">)</span>
+<span class="n">test_data</span>  <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">test_images</span><span class="p">)</span>
+
+<span class="c1">#reshape</span>
+<span class="n">train_data</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="mi">60000</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">test_data</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'after re-shape its now - {}'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">asarray</span><span class="p">(</span><span class="n">train_data</span><span class="p">).</span><span class="nf">shape</span><span class="p">))</span> <span class="c1">#60000 * 28 *28</span></code></pre></figure>
+
+<ul>
+  <li>initially shape of image data was - (60000, 784)</li>
+  <li>after re-shape its now - (60000, 28, 28)</li>
+</ul>
+
+<p><br /><br />
+You can see below that we are able to display the images without needing to reshape each one.
+<br /><br /></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#sanity check for new data</span>
+<span class="c1">#prove it is correct shape</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">60000</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sample</span> <span class="k">in</span> <span class="n">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">train_labels</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">axis</span><span class="p">(</span><span class="s1">'off'</span><span class="p">)</span></code></pre></figure>
+
+<p><img src="/images/img/2017/12/cnn-example-reshape.png" alt="post reshape sanity check" /></p>
+
+<p>Unfortunately this is not where our reshape drama ends. The convolutional layers take images of a particular height and width and convolve them with a model defined number of filters (kernels) of a user defined size.</p>
+
+<p>Because we have more than one filter at each convolutional layer, at this stage we are essentially multiplying our (image) Matrix of 28 * 28 with a Matrix of n * 5 * 5 (using 5 as a typical filter size).</p>
+
+<p>As we know we cannot multiply a 2d matrix by a 3d matrix so we need to explicitly define the dimensions of the third channel in the input image.</p>
+
+<p>If our digit images were RGB format, and had dimensions of 3 * 28 * 28, the original 28 * 28 would still corrispond to the dimensions (number of pixels) across the width and height of the image. We would also have a third parameter the ‘3’ in this instance to refer to each colour channel. The colour channels RGB or red, green and blue will have differing intensities depending on how much of that colour is desplaed at each particular pixel location.</p>
+
+<p>Once we have explicitly defined our matrix dimensions convolution involves taking each filter and placing it at every spacial location of the input image and computing the product itself and each of the pixels that it overlays. This is done at each spacial location across all chanels of the image.</p>
+
+<p>We will add the aditional dimension to our images below:</p>
+
+<p>Now lets initialise our model ..</p>
+
+<p><br /><br /><br /></p>
+<h2 id="step-3-define-network-model-graph">Step 3: Define network model (graph)</h2>
+
+<p>The graph has two convolutional layers seporated by a reLU activation. Following the second convolutional layer, there is a fully connected layer which is essentiall a ‘normal’ two layer neural network.
+<br /><br /></p>
+<h3 id="structure"><strong>Structure</strong></h3>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+    
+<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">input_dims</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">input_chnls</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_filters</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span> <span class="n">filter_sz</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+             <span class="n">sample_sz</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weight_scale</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">initial_params</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)):</span>
+        
+    <span class="n">num_l1_filters</span><span class="p">,</span> <span class="n">num_l2_filters</span> <span class="o">=</span> <span class="n">num_filters</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">stride</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">pad</span> <span class="o">=</span> <span class="n">initial_params</span>
+        
+    <span class="c1">#initialize the conv filters</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">c1_filters</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">weight_scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_l1_filters</span><span class="p">,</span> <span class="n">input_chnls</span><span class="p">,</span> <span class="n">filter_sz</span><span class="p">,</span> <span class="n">filter_sz</span><span class="p">))</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">c1_b</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">([</span><span class="n">num_l1_filters</span><span class="p">])</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">c2_filters</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">weight_scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_l2_filters</span><span class="p">,</span> <span class="n">input_chnls</span><span class="p">,</span> <span class="n">filter_sz</span><span class="p">,</span> <span class="n">filter_sz</span><span class="p">))</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">c2_b</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">([</span><span class="n">num_l2_filters</span><span class="p">])</span>
+        
+    <span class="c1">#initialize the affine layer weights</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">fc_W1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">weight_scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">fc_b1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">([</span><span class="mi">100</span><span class="p">])</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">fc_W2</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">weight_scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">))</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">fc_b2</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">([</span><span class="mi">10</span><span class="p">])</span></code></pre></figure>
+
+<p>Lets breakdown the structure based on the valuees above.
+<br /><br /></p>
+<h4 id="convolutional-layers"><strong><em>Convolutional Layers</em></strong></h4>
+<p>The input to the first convolution layer if we have just 2 input images is (2 * 1 * 28 * 28)
+Thats:</p>
+<ul>
+  <li>Two images</li>
+  <li>Each with a single colour channel (greyscale)</li>
+  <li>With a width of size 28 and a height of size 28</li>
+</ul>
+
+<p>Each of these images is convolved with a matrix of size (16 * 1 * 5 * 5)
+That is:</p>
+<ul>
+  <li>16 Different Filters (just like we have 2 different images we have 16 different filters)</li>
+  <li>Each with a single colour channel</li>
+  <li>And each filter has a width of 5 pixels and a height of 5 pixels</li>
+</ul>
+
+<p>Considering a single image for a moment this image of 1 * 28 * 28
+Every channel in this image (of which there is only one) gets multiplied by 16 different filters
+and the output for that filter is the summation of the product of each of the channel outputs for that particular filter.</p>
+
+<p>Thus at convolutional layer 1 you have 1 * 28 * 28 at the input and 16 * 28 * 28 at the output.</p>
+
+<p>At layer 2 you have 16 * 28 * 28 at the input and 32 * 28 * 28 at the output. This is because each of the 16 layers of the input is multiplied by the first of the 32 filters and the results summed to form the first of the 32 outputs. This process is repeated with each filter until all 32 filters have processed the image.</p>
+
+<p>Each filter is also multiplied by a bias term.</p>
+
+<p>I dont want to go too deeply into convolution because the purpose of this is to delve into the code but :fdsfas
+<br /><br /></p>
+<h4 id="fully-connected-layers"><strong><em>Fully Connected Layers</em></strong></h4>
+<p>Being an ‘Ordinary’ Neural network the fully connected layers do not take a 2d input. 
+A normal Neural Network takes its input as a long vector so we need to reshape <strong>EACH</strong> image into a single vector.</p>
+
+<p>This vector will be the same shape that the image data was in before we rearranged it into 28 by 28 the only difference now is that for each image we have 32 input channels, therefore the length of our vector for a single image is 32 * 28 * 28.</p>
+
+<p>The dimensions of the first input layer therefore are (32x28x28) * number of nodes in the hidden layer.</p>
+
+<p>As we only have a 2 layer fully connected section the dimensions of the second layer are:
+(number of nodes in the hidden layer * number of output classes).</p>
+
+<p>Each node in the fully connected layers is multiplied by a bias as is typical in Neural Networks.</p>
+
+<p><br /></p>
+<h3 id="implementation"><strong>Implementation</strong></h3>
+<p><br /><br /></p>
+
+<h4 id="forward-pass"><strong><em>Forward Pass</em></strong></h4>
+
+<p>Let’s start with the convolutional layer.</p>
+
+<p>First we make a note of the padding and stride that we will be using. For simplicity these were fixed when we initialised the model.</p>
+
+<p>We then find out N, how many sample images we are expecting
+and H, W the height and width of those images.</p>
+
+<p>We also need to find out how many Filters (or kernels) we are expecting in this layer, so k the kernels and k.shape[0] is the number of kernels we are expecting (16 in layer 1, 32 in layer 2).</p>
+
+<p>HH and WW are the width and height of each kernel (indexed as the first 0th and 1st shape params of the 0th channel of the 0th kernel).</p>
+
+<p>We then calculate what the output size of each image will be following convolution, this can vary depending on how big a stride is taken and whether you pad the input image or not.</p>
+
+<p>we then pad the image.
+Create an empty output image set ( size 16x28x28 for conv layer 1).</p>
+
+<p>And <strong>finally</strong></p>
+<ul>
+  <li>For each image(N)</li>
+  <li>for each pixel location in the output image (h_out and w_out). <em>which will equal the number of operations we need to perform on the input image</em></li>
+  <li>we will take a section of our image, whose size is equal to that of our filter, and we multiply each channel in the input image by each layer individually, sum the result and store it in the layer at the given pixel location in the output image. (once we have added the bias term.)</li>
+</ul>
+
+<p>This is shown below</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">convForward</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">stride</span><span class="p">,</span> <span class="n">pad</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">stride</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">pad</span>
+    <span class="no">N</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="no">H</span><span class="p">,</span> <span class="no">W</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nf">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="no">F</span> <span class="o">=</span> <span class="n">k</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="no">HH</span><span class="p">,</span> <span class="no">WW</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nf">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        
+    <span class="n">h_out</span> <span class="o">=</span> <span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span> <span class="p">(</span><span class="no">H</span> <span class="o">-</span> <span class="no">HH</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pad</span><span class="p">))</span> <span class="o">/</span> <span class="n">stride</span> <span class="p">)</span>
+    <span class="n">w_out</span> <span class="o">=</span> <span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span> <span class="p">(</span><span class="no">W</span> <span class="o">-</span> <span class="no">WW</span> <span class="o">+</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pad</span><span class="p">)))</span> <span class="o">/</span> <span class="n">stride</span> <span class="p">)</span>
+        
+    <span class="n">x_pad</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">pad</span><span class="p">((</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="n">pad</span><span class="p">,),</span> <span class="p">(</span><span class="n">pad</span><span class="p">,)),</span> <span class="s1">'constant'</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="no">N</span><span class="p">,</span> <span class="no">F</span><span class="p">,</span> <span class="n">h_out</span><span class="p">,</span> <span class="n">w_out</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">F</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="n">h_out</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="n">w_out</span><span class="p">):</span>
+                    <span class="n">output</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">((</span><span class="n">x_pad</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:,</span> <span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">stride</span><span class="p">)</span> <span class="p">:</span> <span class="p">((</span><span class="n">h</span><span class="o">+</span><span class="no">HH</span><span class="p">)</span><span class="o">*</span><span class="n">stridew</span> <span class="o">*</span> <span class="n">stride</span><span class="p">)</span> <span class="p">:</span> <span class="p">((</span><span class="n">w</span><span class="o">+</span><span class="no">WW</span><span class="p">)</span><span class="o">*</span><span class="n">stride</span><span class="p">)]</span> <span class="o">*</span> <span class="n">k</span><span class="p">[</span><span class="n">f</span><span class="p">])</span><span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
+        
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">cache</span></code></pre></figure>
+
+<p><br /><br /></p>
+
+<p>The fully connected layer is Exactly the same as we’ve seen in previous posts, There is a dot product of the input with the weights at layer one, plus an addition of bias terms. The result of this is passed through a ReLu activation function.</p>
+
+<p>At the second layer the output from the activation function is used as to calculate the dot product with the weights at layer 2 and summed with bias terms to compute the logits (scores before the softmax is applied).</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">fc_forward</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">relu</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="ss">x: </span><span class="n">np</span><span class="p">.</span><span class="nf">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nf">fc_W1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">self</span><span class="p">.</span><span class="nf">fc_b1</span>
+    <span class="n">a1_relu</span> <span class="o">=</span> <span class="n">relu</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">a1_relu</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nf">fc_W2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">self</span><span class="p">.</span><span class="nf">fc_b2</span> <span class="c1">#logits</span>
+            
+    <span class="k">return</span> <span class="n">scores</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a1_relu</span><span class="p">)</span></code></pre></figure>
+
+<p><br /><br /><br /></p>
+<h3 id="backward-pass"><em>Backward Pass</em></h3>
+
+<p>As the fully connected layer is the last thing we saw in the forward pass, its the first thing we see in the backward pass. Once again for brevity I have put everything into one function.</p>
+
+<p>This is essentially the same as we have seen before.
+We calculate probability using the softmax and the data loss using cross entropy loss. With these values obtained we are able to figure out the derivative of each of our values with respect to this loss. That is, to what extent they contributed to the misclassification. The code is shown below.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">fc_backward</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_cls</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mi">0</span><span class="o">.</span><span class="mo">05</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a1_relu</span> <span class="o">=</span> <span class="n">cache</span>
+    <span class="no">N</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">c_e_loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y_cls</span><span class="p">)</span>
+            
+    <span class="n">data_loss</span> <span class="o">=</span> <span class="n">loss</span>
+    <span class="n">reg_loss</span> <span class="o">=</span> <span class="n">reg</span> <span class="o">*</span> <span class="mi">0</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nf">fc_W1</span><span class="o">*</span><span class="nb">self</span><span class="p">.</span><span class="nf">fc_W1</span><span class="p">)</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">*</span> <span class="mi">0</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nf">fc_W2</span><span class="o">*</span><span class="nb">self</span><span class="p">.</span><span class="nf">fc_W2</span><span class="p">)</span>
+            
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">data_loss</span> <span class="o">+</span> <span class="n">reg_loss</span>
+    <span class="n">dscores</span> <span class="o">=</span> <span class="n">probabilities</span>
+    <span class="n">dscores</span><span class="p">[</span><span class="n">range</span><span class="p">(</span><span class="no">N</span><span class="p">),</span><span class="n">y_cls</span><span class="p">]</span> <span class="o">=-</span><span class="mi">1</span>
+    <span class="n">dscores</span> <span class="o">/=</span> <span class="no">N</span>
+        
+
+    <span class="n">db2</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">dscores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">dW2</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="n">a1_relu</span><span class="o">.</span><span class="no">T</span><span class="p">,</span> <span class="n">dscores</span><span class="p">)</span>
+            
+    <span class="n">d_reluIn</span> <span class="o">=</span> <span class="n">a1_relu</span>
+    <span class="n">d_reluIn</span><span class="p">[</span><span class="n">a1</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        
+    <span class="n">db1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">d_reluIn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">dW1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="no">T</span><span class="p">,</span> <span class="n">d_reluIn</span><span class="p">)</span>
+    <span class="n">dx</span>  <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="n">d_reluIn</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">fc_W1</span><span class="o">.</span><span class="no">T</span><span class="p">)</span>                   
+            
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"b1"</span><span class="p">:</span> <span class="n">db1</span><span class="p">,</span> <span class="s2">"d2"</span><span class="p">:</span> <span class="n">db2</span><span class="p">,</span> <span class="s2">"W1"</span><span class="p">:</span> <span class="n">dW1</span><span class="p">,</span> <span class="s2">"W2"</span><span class="p">:</span> <span class="n">dW2</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">:</span> <span class="n">dx</span><span class="p">}</span></code></pre></figure>
+
+<p>The interesting part is what we return, we will be using our gradients for weights and biass to update W1 &amp; W2 and b1 and b2 through stocastic gradient descent. However, the story does not end here because we still have two convolutional neural networks which we need to backpropagate through. This is why we are also returning dx.</p>
+
+<p>dx, or the gradient of the loss with respect to x, is to the backpropagation layer conv2, what the loss calculated above is to fc_backward. It is the first step in calculated the respective losses of the convolutional layer 2 components. In order to make this useful we need to make a note of the shape of this matrix.</p>
+
+<p>each image is currently one long 25088 (32x28x28 ) dimentional vector and needs to be reshaped in order to be compatable with the dimentionality of the layers its trying to calculate the loss of.</p>
+
+<p>The reshaped (32<em>28</em>28) output can now serve as the input to the convBackward, along with the cached values from the layer 2 forward pass that we need in order to calculate our derivatives.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">fc_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span> <span class="o">=</span> <span class="n">fc_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">].</span><span class="nf">reshape</span><span class="p">(</span><span class="n">c2_out</span><span class="p">.</span><span class="nf">shape</span><span class="p">)</span>
+<span class="n">c2_grads</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">convBackward</span><span class="p">(</span><span class="n">fc_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">],</span> <span class="n">c2_cache</span><span class="p">)</span></code></pre></figure>
+
+<p>convBackward is implemented for individual layers and is called called N times depending on how many convolutional layers are present in the CNN.</p>
+
+<p>The cache holds values used in the forward pass of the CNN the input, kernel and bias terms. These are needed to calculate the derivatives.</p>
+
+<p>After unpacking them and noting the stride and padding used for this layer (again fixed at model initialization for simplicity), we extract the shape parameters we need for our looping constructs.</p>
+
+<p><em>AT THIS POINT I WOULD AGAIN LIKE TO STRESS THAT THIS FUNCTION IS MERELY ILLUSTRATIVE</em>
+<em>while it will indeed work as expected the computational complexity due to all the nested loops (specifically the last one) make it horribly inefficient and unwieldy</em></p>
+
+<p>we calculate the loss with respect to the bias by summation as usual, however this time we sum on a filter by filter basis.</p>
+
+<p>Next we recreate out initial input object which would have been input x, with padding applied. (in fairness i could have cached this and passed it in too)
+we also create a placeholder for our filter values, the shape is that of the original filter matrix.</p>
+
+<p>Then for each position that the filter took up in x_pad (which we assign to sub_x), our loss is the accumulation of the loss at each of these positions with respect to the output x.</p>
+
+<p>And finally..</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">convBackward</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">dout</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+        
+    <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">cache</span>
+    <span class="n">stride</span><span class="p">,</span> <span class="n">pad</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">stride</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">pad</span>
+        
+    <span class="no">N</span><span class="p">,</span> <span class="no">F</span><span class="p">,</span> <span class="no">Hh</span><span class="p">,</span> <span class="no">Ww</span> <span class="o">=</span> <span class="n">dout</span><span class="p">.</span><span class="nf">shape</span>
+    <span class="no">N</span><span class="p">,</span> <span class="no">C</span><span class="p">,</span> <span class="no">H</span><span class="p">,</span> <span class="no">W</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">shape</span>
+    <span class="no">F</span><span class="p">,</span> <span class="no">C</span><span class="p">,</span> <span class="no">HH</span><span class="p">,</span> <span class="no">WW</span> <span class="o">=</span> <span class="n">k</span><span class="p">.</span><span class="nf">shape</span>
+        
+    <span class="n">db</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="no">F</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">F</span><span class="p">):</span>
+        <span class="n">db</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">dout</span><span class="p">[:,</span><span class="n">f</span><span class="p">,:,:])</span><span class="c1">##shape</span>
+            
+            
+    <span class="n">x_pad</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="n">pad</span><span class="p">,),</span> <span class="p">(</span><span class="n">pad</span><span class="p">,)),</span> <span class="s1">'constant'</span><span class="p">)</span>
+    <span class="n">dw</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="no">F</span><span class="p">,</span> <span class="no">C</span><span class="p">,</span> <span class="no">HH</span><span class="p">,</span> <span class="no">WW</span><span class="p">))</span>
+        
+    <span class="k">for</span> <span class="n">f</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">F</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">C</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">HH</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="no">WW</span><span class="p">):</span>
+                    <span class="n">sub_x</span> <span class="o">=</span> <span class="n">x_pad</span><span class="p">[:,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">:(</span><span class="n">h</span> <span class="o">+</span> <span class="no">Hh</span> <span class="o">*</span><span class="n">stride</span><span class="p">):</span> <span class="n">stride</span><span class="p">,</span> <span class="n">w</span><span class="p">:(</span><span class="n">w</span><span class="o">+</span><span class="no">Ww</span> <span class="o">*</span><span class="n">stride</span><span class="p">)</span><span class="ss">:stride</span><span class="p">]</span> <span class="c1">#which part of X_pad did you affect</span>
+                    <span class="n">dw</span><span class="p">[</span><span class="n">f</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">dout</span><span class="p">[:,</span><span class="n">f</span><span class="p">,:,:]</span> <span class="o">*</span> <span class="n">sub_x</span><span class="p">)</span>
+                        </code></pre></figure>
+
+<p><br /><br /><br />
+<strong>So how does it all come together..</strong></p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_gt</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">):</span>
+        
+    <span class="n">num_samples</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_epochs</span> <span class="o">=</span> <span class="n">sample_size</span> <span class="o">/</span> <span class="n">num_samples</span>
+        
+    <span class="k">for</span> <span class="n">it</span> <span class="k">in</span> <span class="n">range</span><span class="p">(</span><span class="n">num_iterations</span><span class="p">):</span>
+        <span class="n">batch_idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">sample_size</span><span class="p">)</span>
+            
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">batch_idx</span><span class="p">]</span>    
+        <span class="n">y_batch_cls</span> <span class="o">=</span> <span class="n">y_gt</span><span class="p">[</span><span class="n">batch_idx</span><span class="p">]</span>
+        <span class="n">x_batch</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">batch_idx</span><span class="p">]</span>
+        <span class="c1">#</span>
+        <span class="c1"># FORWARD PASS</span>
+        <span class="c1">#</span>
+        <span class="c1"># conv layers</span>
+        <span class="n">c1_out</span><span class="p">,</span> <span class="n">c1_cache</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">convForward</span><span class="p">(</span><span class="n">x_batch</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">c1_filters</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">c1_b</span><span class="p">)</span>
+        <span class="n">c2_in</span> <span class="o">=</span> <span class="n">relu</span><span class="p">(</span><span class="n">c1_out</span><span class="p">)</span>            
+        <span class="n">c2_out</span><span class="p">,</span> <span class="n">c2_cache</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">convForward</span><span class="p">(</span><span class="n">c1_in</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">c2_filters</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="nf">c2_b</span><span class="p">)</span>
+            
+        <span class="c1"># fc layers</span>
+        <span class="c1"># stretch out input - reshape</span>
+        <span class="n">fc_in_flat</span> <span class="o">=</span> <span class="n">c2_out</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">c2_out</span><span class="p">.</span><span class="nf">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="c1"># fc layer</span>
+        <span class="n">scores</span><span class="p">,</span> <span class="n">fc_cache</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">fc_forward</span><span class="p">(</span><span class="n">fc_in_flat</span><span class="p">)</span>
+                 
+            
+        <span class="c1">#</span>
+        <span class="c1"># BACKWARD PASS</span>
+        <span class="c1">#</span>
+        <span class="n">fc_grads</span> <span class="o">=</span>  <span class="nb">self</span><span class="p">.</span><span class="nf">fc_backward</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">y_batch_cls</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">fc_cache</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="c1"># (UN)Reshape -- change back to shape of kernels</span>
+        <span class="n">fc_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span> <span class="o">=</span> <span class="n">fc_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">].</span><span class="nf">reshape</span><span class="p">(</span><span class="n">c2_out</span><span class="p">.</span><span class="nf">shape</span><span class="p">)</span>
+            
+        <span class="c1">#</span>
+        <span class="c1">#</span>
+        <span class="n">c2_grads</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">convBackward</span><span class="p">(</span><span class="n">fc_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">],</span> <span class="n">c2_cache</span><span class="p">)</span>
+        <span class="n">c2_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">][</span><span class="n">c1_out</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#backprop Relu</span>
+        <span class="n">c1_grads</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="nf">convBackward</span><span class="p">(</span><span class="n">c2_grads</span><span class="p">[</span><span class="s1">'x'</span><span class="p">],</span> <span class="n">c1_cache</span><span class="p">)</span>
+            
+            
+        <span class="c1">##</span>
+        <span class="c1">## update weights and bias' here</span>
+        <span class="c1">##</span></code></pre></figure>
+
+
+  </div>
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Mike James - I had a bit of spare time..</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            
+              Mike James - I had a bit of spare time..
+            
+            </li>
+            
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/MikeJay-ctrl"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">MikeJay-ctrl</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Im always exploring new areas of Software Engineering and Computer Science. So from now on.. Whenever I have a bit of spare time, ill do a quick post and explore some of the themes here.
+Be sure to check back, when you get some time of your own.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
