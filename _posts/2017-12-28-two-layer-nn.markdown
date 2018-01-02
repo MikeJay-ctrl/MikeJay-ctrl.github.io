@@ -7,11 +7,11 @@ category: "Neural Networks"
 
 
 
-**When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)**
+**When I first got started with machine learning tensorFlow didnt exist! (at least publicly)**
 
-When I was completing my masters all equations and transformations had to be intimately understood in order to form any kind of working implementation of a machine learning algorithm. 
+When I was completing my masters, all equations and transformations had to be intimately understood, in order to form any kind of working implementation of a machine learning algorithm. 
 
-TensorFlow is a great tool and im glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.
+TensorFlow is a great tool and i'm glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.
 
 While I dont plan to go into the mathematics here, in this post I will create a simple 2 layer neural network (with backprop) and use it to classify the MNIST dataset. In order to give some intuition as to what is going on behind the scenes with tensorflow.
 
@@ -32,9 +32,10 @@ import matplotlib.pyplot as plt
 
 {% endhighlight %}
 These are all the libraries we will be using for today.
-The mnist library allows us to extract the MNIST dataset from the zipped files 
-Numpy is the de-facto standard for Machine Learning "tensor" (vector) manipulation.
-MatplotLib will allow us to visualise our data
+* The **mnist** library allows us to extract the MNIST dataset from the zipped files. 
+* **Numpy** is the de-facto standard for Machine Learning "tensor" (vector) manipulation.
+* **MatplotLib** will allow us to visualise our data.
+
 The last line simply tells us to display our plots inline
 
 
@@ -115,12 +116,13 @@ We then iterate through each of our newly made vectors and for each row in our s
 OK.. ready..
 
 
-first things first we create a class to encapsulate our model and its parameters, ive called it NNModel (Neural Network Model).
+first things first, we create a class to encapsulate our model and its parameters, i've called it NNModel (Neural Network Model).
 
 This model take 3 initialization parametars:
-input_sz - the number of input images in the current batch for (10000 for test batch)
-hidden_sz - the number of neurones in the hidden layer
-output_sz - the number of classes to map to
+
+* **input_sz** - the number of input images in the current batch for (10000 for test batch)
+* **hidden_sz** - the number of neurones in the hidden layer
+* **output_sz** - the total number of classes that we can mapp to
 <br/><br/>
 
 {% highlight ruby %}
@@ -130,15 +132,15 @@ class NNModel:
        	self.b1 = np.zeros(output_sz) 
 {% endhighlight %}
 <br/>
-within the initialization class we initialize the weights W1 and the bias B1 as parameters, making them class variables using the 'self.' prefix.
+In the initialization class abovewe initialize the weights W1 and the bias b1 as parameters, making them class variables using the 'self.' prefix.
 
-*W1 is 2d matrix with dimensions [input_sz * output_sz]
-*b1 is 1d column vector of length output_sz
+* **W1** is 2d matrix with dimensions [input_sz * output_sz]
+* **b1** is 1d column vector of length output_sz
 
 
 
 The calc_loss method is going to hold the bulk of our ML logic,
-for brevity and out of laziness, I've put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.
+for brevity, I've put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.
 
 Lets look at the forward pass first:
 
@@ -150,7 +152,7 @@ def calc_loss(self, x, y, y_gt, reg):
         
 {% endhighlight %}
 
-Very simply, we take x and calculate the dot product between it and out weights matrix initialised earlier, we then add the bias to ths to produce a1.
+Very simply, we take x and calculate the dot product between it and the weights matrix initialised earlier, we then add the bias to ths to produce a1.
 a1 is essentially our best guess, given each image, of what number this image depicts (which class 0-9 it belongs to)
 
 
@@ -170,7 +172,7 @@ def softmax(self, scores):
     return e_scores/ np.sum(e_scores, axis=1, keepdims=True) 
 {% endhighlight %}
 <br/>
-The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probabiility because all values are positive and together sum to 1.
+The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probability because all values are positive and together sum to 1.
 
 Next we calculate the cross entropy loss with respect to our data.
 <br/><br/>
@@ -180,10 +182,10 @@ def c_e_loss(self, probs, labels):
     return (np.sum(-np.log(probs[range(N), labels])) / N)
 {% endhighlight %}
 <br/>
-The **Cross entropy** loss is defined as the negative log likelihood [[MORE]]
+The **Cross entropy** loss also known as the negative log likelihood, is used to measure the (dis)similarity between the true class and the predicted class.
 
-once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
-This is so called 'L2 Regularization' and essentially means that if the same function is represented by a higher order and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm, which is in turn added to the overall loss, the lower order function will be prefered.
+Once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
+This is so called 'L2 Regularization'. It essentially means that if the same function is represented by a higher and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm (which is in turn added to the overall loss), the lower order function will be prefered.
 
 
 The loss calculation section of our forward pass is shown below
@@ -201,7 +203,7 @@ loss = data_loss + reg_loss
 <br/>
 #### **4.2 - Backpropagation**
 
-Finally we need to backpropagate in order to update our weights and adjust them such that the next time we make a prediction, it will slightly better than what we have estimated previously.
+Finally, we need to backpropagate in order to update and adjust our weights. This means that the next time we make a prediction, it will be slightly better than what we have estimated previously.
 
 In order to do this we need to understand how much effect each value used, at each stage of our forward pass, had on our final outcome. Once we know this we can adjust these values in a way that will minimise the loss incurred.
 
@@ -221,7 +223,7 @@ dx = np.dot(dscores, self.W1.T)
 Because we only have one set of weights, really we only need to calculate the loss with respect to self.W1 and self.b1, however if this network were any deeper we would use the loss with respect to x as a parameter to calculate the loss with respect to earlier layers.
 
 
-The process of finding calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.
+The process of calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.
 
 <br/><br/><br/>
 ## Step 5: Train our model!
@@ -258,7 +260,7 @@ def train(self, x, y, y_gt, lr, batch_size, iterations, reg=5e-6):
 
 Instead of trying to update all the weights of all the samples in what could be a dataset of millions of points we perform 'stocastic' gradient descent. Where we take a random subset of the samples and adjust the weights based on the results of our predictions on this subset.
 
-Each subset is called a batch, you can see that we pass a batch of images and its corrisponding labels to the calc_loss function and based on those results we update our weights.
+Each subset is called a batch, you can see that we pass a batch of images and its corresponding labels to the calc_loss function and based on those results we update our weights.
 
 We are returning our loss as well as the gradient so that we can plot our loss per iteration on a graph and make inferences based on its shape.
 
@@ -267,7 +269,7 @@ We are returning our loss as well as the gradient so that we can plot our loss p
 
 Once we've finished training our model we use the predict function, on our test dataset to see how accurately we can predict each example image.
 
-The code below runs performs training and test on the model defined above, the outcome is shown in the plot below.
+The code below performs training and test on the model defined above, the outcome is shown in the plot below.
 
 {% highlight ruby %}
 #use model on dataset

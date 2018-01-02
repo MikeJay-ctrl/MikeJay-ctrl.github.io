@@ -15,7 +15,7 @@ These days single layer networks are of limited use, deeper and more complex net
 In this post i will implement a CNN using just numpy. 
 
 
-The code does run and is verified as working correctly.. **however the backpropagation is completely Naieve, unoptimised.. and for illustrative purposes only. It will take far too long to run on any real data.**
+The code does run and is verified as working correctly.. **however the backpropagation is completely naive, unoptimised.. and for illustrative purposes only. It will take far too long to run on any real data.**
 
 Once again, The code is available from my Github and I'll do my best to keep it in a single file and explain as much as possible.  
 
@@ -77,9 +77,9 @@ for idx, sample in enumerate(samples):
 ## Step 1: Data and Preprocessing
 
 
-The data we have contains the raw pixel values for the images we need however in the above you notice that the array needed to be reshaped in order to display the image according to its actual visual representation.
+The data we have contains the raw pixel values for the images we need, however in the above you notice that the array needed to be reshaped in order to display the image according to its actual visual representation.
 
-Currently the train images exist in a 2d vector of shape 6000 * 784 however CNN's attempt to interpret not only pixel values but the spacial relationships that exist within a given image. This means that in order to make this data suitable for input to the CNN we need to input each image as a 28 * 28 dimensional array. The 28 * 28 pixels refer to the width and height (in pixels) of each image, that is the number of elements in each row and column of the matrix.
+Currently the training images exist in a 2d vector of shape 6000 * 784 however CNN's attempt to interpret not only pixel values, but the spacial relationships that exist within a given image. This means that in order to make this data suitable for input to the CNN we need to input each image as a 28 * 28 dimensional array. The 28 * 28 pixels refer to the width and height (in pixels) of each image, that is the number of elements in each row and column of the matrix.
 
 The conversion is done below.
 
@@ -128,12 +128,12 @@ Unfortunately this is not where our reshape drama ends. The convolutional layers
 
 Because we have more than one filter at each convolutional layer, at this stage we are essentially multiplying our (image) Matrix of 28 * 28 with a Matrix of n * 5 * 5 (using 5 as a typical filter size).
 
-As we know we cannot multiply a 2d matrix by a 3d matrix so we need to explicitly define the dimensions of the third channel in the input image.
+As we know, we cannot multiply a 2d matrix by a 3d matrix so we need to explicitly define the dimensions of the third channel in the input image.
 
 
-If our digit images were RGB format, and had dimensions of 3 * 28 * 28, the original 28 * 28 would still corrispond to the dimensions (number of pixels) across the width and height of the image. We would also have a third parameter the '3' in this instance to refer to each colour channel. The colour channels RGB or red, green and blue will have differing intensities depending on how much of that colour is desplaed at each particular pixel location.
+If our digit images were RGB format, and had dimensions of 3 * 28 * 28, those 28 * 28 pixels would still corrispond to locations across the width and height of the image. We would also have a third parameter the '3' in this instance to refer to each colour channel. The colour channels RGB or red, green and blue will have differing intensities depending on how much of that colour is displayed at each particular pixel location.
 
-Once we have explicitly defined our matrix dimensions convolution involves taking each filter and placing it at every spacial location of the input image and computing the product itself and each of the pixels that it overlays. This is done at each spacial location across all chanels of the image.
+Once we have explicitly defined our matrix dimensions they will suitable for convolution in our model. Convolution involves taking each filter and placing it at every spacial location of the input image, in order to compute the product itself and each of the pixels that it overlays. This is done at each spacial location across all chanels of the image.
 
 We will add the aditional dimension to our images below:
 
@@ -147,7 +147,7 @@ We will add the aditional dimension to our images below:
 ## Step 3: Define network model (graph)
 
 
-The graph has two convolutional layers seporated by a reLU activation. Following the second convolutional layer, there is a fully connected layer which is essentiall a 'normal' two layer neural network.
+The graph has two convolutional layers separated by a ReLU activation. Following the second convolutional layer, there is a fully connected layer which is essentially a 'normal' two layer neural network.
 <br/><br/>
 ### **Structure**
 
@@ -176,11 +176,11 @@ def __init__(self, input_dims=28, input_chnls=1, num_filters=(16, 32), filter_sz
 {% endhighlight %}
 
 
-Lets breakdown the structure based on the valuees above.
+Lets breakdown the structure based on the values above.
 <br/><br/>
 #### ***Convolutional Layers***
 The input to the first convolution layer if we have just 2 input images is (2 * 1 * 28 * 28)
-Thats:
+That is:
 * Two images
 * Each with a single colour channel (greyscale)
 * With a width of size 28 and a height of size 28
@@ -204,7 +204,7 @@ At layer 2 you have 16 * 28 * 28 at the input and 32 * 28 * 28 at the output. Th
 
 Each filter is also multiplied by a bias term.
 
-I dont want to go too deeply into convolution because the purpose of this is to delve into the code but :fdsfas
+
 <br/><br/>
 #### ***Fully Connected Layers***
 Being an 'Ordinary' Neural network the fully connected layers do not take a 2d input. 

@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Two layer NN - Numpy Implementation - MNIST Classifier</title>
-  <meta name="description" content="When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)">
+  <meta name="description" content="When I first got started with machine learning tensorFlow didnt exist! (at least publicly)">
 
   <link rel="stylesheet" href="/assets/main.css">
   <link rel="canonical" href="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html">
@@ -77,11 +77,11 @@
   </header>
 
   <div class="post-content" itemprop="articleBody">
-    <p><strong>When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)</strong></p>
+    <p><strong>When I first got started with machine learning tensorFlow didnt exist! (at least publicly)</strong></p>
 
-<p>When I was completing my masters all equations and transformations had to be intimately understood in order to form any kind of working implementation of a machine learning algorithm.</p>
+<p>When I was completing my masters, all equations and transformations had to be intimately understood, in order to form any kind of working implementation of a machine learning algorithm.</p>
 
-<p>TensorFlow is a great tool and im glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.</p>
+<p>TensorFlow is a great tool and i’m glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.</p>
 
 <p>While I dont plan to go into the mathematics here, in this post I will create a simple 2 layer neural network (with backprop) and use it to classify the MNIST dataset. In order to give some intuition as to what is going on behind the scenes with tensorflow.</p>
 
@@ -97,11 +97,14 @@ I’ll do my best to keep it in a single file and explain as much as possible.</
 <span class="n">import</span> <span class="n">matplotlib</span><span class="p">.</span><span class="nf">pyplot</span> <span class="n">as</span> <span class="n">plt</span> 
 <span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span></code></pre></figure>
 
-<p>These are all the libraries we will be using for today.
-The mnist library allows us to extract the MNIST dataset from the zipped files 
-Numpy is the de-facto standard for Machine Learning “tensor” (vector) manipulation.
-MatplotLib will allow us to visualise our data
-The last line simply tells us to display our plots inline</p>
+<p>These are all the libraries we will be using for today.</p>
+<ul>
+  <li>The <strong>mnist</strong> library allows us to extract the MNIST dataset from the zipped files.</li>
+  <li><strong>Numpy</strong> is the de-facto standard for Machine Learning “tensor” (vector) manipulation.</li>
+  <li><strong>MatplotLib</strong> will allow us to visualise our data.</li>
+</ul>
+
+<p>The last line simply tells us to display our plots inline</p>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">data</span> <span class="o">=</span> <span class="no">MNIST</span><span class="p">(</span><span class="s1">'../data'</span><span class="p">)</span>
 <span class="n">train_images</span><span class="p">,</span> <span class="n">train_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="nf">load_training</span><span class="p">()</span>
@@ -172,13 +175,16 @@ The last line simply tells us to display our plots inline</p>
 
 <p>OK.. ready..</p>
 
-<p>first things first we create a class to encapsulate our model and its parameters, ive called it NNModel (Neural Network Model).</p>
+<p>first things first, we create a class to encapsulate our model and its parameters, i’ve called it NNModel (Neural Network Model).</p>
 
-<p>This model take 3 initialization parametars:
-input_sz - the number of input images in the current batch for (10000 for test batch)
-hidden_sz - the number of neurones in the hidden layer
-output_sz - the number of classes to map to
-<br /><br /></p>
+<p>This model take 3 initialization parametars:</p>
+
+<ul>
+  <li><strong>input_sz</strong> - the number of input images in the current batch for (10000 for test batch)</li>
+  <li><strong>hidden_sz</strong> - the number of neurones in the hidden layer</li>
+  <li><strong>output_sz</strong> - the total number of classes that we can mapp to
+<br /><br /></li>
+</ul>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">NNModel</span><span class="p">:</span>
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="n">input_sz</span><span class="p">,</span> <span class="n">hidden_sz</span><span class="p">,</span> <span class="n">output_sz</span><span class="p">,</span><span class="n">weightInitFcn</span><span class="o">=</span><span class="no">None</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
@@ -186,13 +192,15 @@ output_sz - the number of classes to map to
        	<span class="nb">self</span><span class="p">.</span><span class="nf">b1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">output_sz</span><span class="p">)</span> </code></pre></figure>
 
 <p><br />
-within the initialization class we initialize the weights W1 and the bias B1 as parameters, making them class variables using the ‘self.’ prefix.</p>
+In the initialization class abovewe initialize the weights W1 and the bias b1 as parameters, making them class variables using the ‘self.’ prefix.</p>
 
-<p>*W1 is 2d matrix with dimensions [input_sz * output_sz]
-*b1 is 1d column vector of length output_sz</p>
+<ul>
+  <li><strong>W1</strong> is 2d matrix with dimensions [input_sz * output_sz]</li>
+  <li><strong>b1</strong> is 1d column vector of length output_sz</li>
+</ul>
 
 <p>The calc_loss method is going to hold the bulk of our ML logic,
-for brevity and out of laziness, I’ve put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.</p>
+for brevity, I’ve put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.</p>
 
 <p>Lets look at the forward pass first:</p>
 
@@ -202,7 +210,7 @@ for brevity and out of laziness, I’ve put the forward and backward pass within
     <span class="n">scores</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="no">W1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">self</span><span class="p">.</span><span class="nf">b1</span>
         </code></pre></figure>
 
-<p>Very simply, we take x and calculate the dot product between it and out weights matrix initialised earlier, we then add the bias to ths to produce a1.
+<p>Very simply, we take x and calculate the dot product between it and the weights matrix initialised earlier, we then add the bias to ths to produce a1.
 a1 is essentially our best guess, given each image, of what number this image depicts (which class 0-9 it belongs to)</p>
 
 <p><br /><br /><br /></p>
@@ -220,7 +228,7 @@ a1 is essentially our best guess, given each image, of what number this image de
     <span class="k">return</span> <span class="n">e_scores</span><span class="o">/</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">e_scores</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="no">True</span><span class="p">)</span> </code></pre></figure>
 
 <p><br />
-The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probabiility because all values are positive and together sum to 1.</p>
+The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probability because all values are positive and together sum to 1.</p>
 
 <p>Next we calculate the cross entropy loss with respect to our data.
 <br /><br /></p>
@@ -230,10 +238,10 @@ The softmax function takes our uncorrelated scores and converts them into a prob
     <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">probs</span><span class="p">[</span><span class="n">range</span><span class="p">(</span><span class="no">N</span><span class="p">),</span> <span class="n">labels</span><span class="p">]))</span> <span class="o">/</span> <span class="no">N</span><span class="p">)</span></code></pre></figure>
 
 <p><br />
-The <strong>Cross entropy</strong> loss is defined as the negative log likelihood [[MORE]]</p>
+The <strong>Cross entropy</strong> loss also known as the negative log likelihood, is used to measure the (dis)similarity between the true class and the predicted class.</p>
 
-<p>once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
-This is so called ‘L2 Regularization’ and essentially means that if the same function is represented by a higher order and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm, which is in turn added to the overall loss, the lower order function will be prefered.</p>
+<p>Once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
+This is so called ‘L2 Regularization’. It essentially means that if the same function is represented by a higher and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm (which is in turn added to the overall loss), the lower order function will be prefered.</p>
 
 <p>The loss calculation section of our forward pass is shown below
 <br /><br /></p>
@@ -248,7 +256,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 <p><br /></p>
 <h4 id="42---backpropagation"><strong>4.2 - Backpropagation</strong></h4>
 
-<p>Finally we need to backpropagate in order to update our weights and adjust them such that the next time we make a prediction, it will slightly better than what we have estimated previously.</p>
+<p>Finally, we need to backpropagate in order to update and adjust our weights. This means that the next time we make a prediction, it will be slightly better than what we have estimated previously.</p>
 
 <p>In order to do this we need to understand how much effect each value used, at each stage of our forward pass, had on our final outcome. Once we know this we can adjust these values in a way that will minimise the loss incurred.</p>
 
@@ -265,7 +273,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 <p>Because we only have one set of weights, really we only need to calculate the loss with respect to self.W1 and self.b1, however if this network were any deeper we would use the loss with respect to x as a parameter to calculate the loss with respect to earlier layers.</p>
 
-<p>The process of finding calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.</p>
+<p>The process of calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.</p>
 
 <p><br /><br /><br /></p>
 <h2 id="step-5-train-our-model">Step 5: Train our model!</h2>
@@ -298,7 +306,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 <p>Instead of trying to update all the weights of all the samples in what could be a dataset of millions of points we perform ‘stocastic’ gradient descent. Where we take a random subset of the samples and adjust the weights based on the results of our predictions on this subset.</p>
 
-<p>Each subset is called a batch, you can see that we pass a batch of images and its corrisponding labels to the calc_loss function and based on those results we update our weights.</p>
+<p>Each subset is called a batch, you can see that we pass a batch of images and its corresponding labels to the calc_loss function and based on those results we update our weights.</p>
 
 <p>We are returning our loss as well as the gradient so that we can plot our loss per iteration on a graph and make inferences based on its shape.</p>
 
@@ -307,7 +315,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 <p>Once we’ve finished training our model we use the predict function, on our test dataset to see how accurately we can predict each example image.</p>
 
-<p>The code below runs performs training and test on the model defined above, the outcome is shown in the plot below.</p>
+<p>The code below performs training and test on the model defined above, the outcome is shown in the plot below.</p>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#use model on dataset</span>
 
@@ -384,7 +392,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
       </div>
 
       <div class="footer-col footer-col-3">
-        <p>Im always exploring new areas of Software Engineering and Computer Science. So from now on.. Whenever I have a bit of spare time, ill do a quick post and explore some of the themes here.
+        <p>Im always exploring new areas of Software Engineering and Computer Science. So from now on.. Whenever I have a bit of spare time, i&#39;ll do a quick post and explore some of the themes here.
 Be sure to check back, when you get some time of your own.
 </p>
       </div>

@@ -8,7 +8,7 @@ category: "Data Science"
 
 
 <br/><br/>
-The Music4ML dataset contains a csv and an sqlite3.db file for your consumption. So in this post i thought id provide some insight on how to consume and the data with pandas.
+The Music4ML dataset contains a csv and an sqlite3.db file for your consumption. So in this post I thought i'd provide some insight on how to consume and the data with pandas.
 
 
 The CSV file can be imported using pandas natve read_csv command as shown below 

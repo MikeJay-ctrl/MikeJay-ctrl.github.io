@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.5">Jekyll</generator><link href="http://localhost:4444/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4444/" rel="alternate" type="text/html" /><updated>2018-01-01T17:22:02+00:00</updated><id>http://localhost:4444/</id><title type="html">Mike James - I had a bit of spare time..</title><subtitle>Im always exploring new areas of Software Engineering and Computer Science. So from now on.. Whenever I have a bit of spare time, ill do a quick post and explore some of the themes here.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.5">Jekyll</generator><link href="http://localhost:4444/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4444/" rel="alternate" type="text/html" /><updated>2018-01-02T17:52:00+00:00</updated><id>http://localhost:4444/</id><title type="html">Mike James - I had a bit of spare time..</title><subtitle>Im always exploring new areas of Software Engineering and Computer Science. So from now on.. Whenever I have a bit of spare time, i'll do a quick post and explore some of the themes here.
 Be sure to check back, when you get some time of your own.
 </subtitle><entry><title type="html">CNN in TensorFlow - CIFAR-10 Classification</title><link href="http://localhost:4444/neural%20networks/2017/12/31/Two-layer-cnn-cifar-10.html" rel="alternate" type="text/html" title="CNN in TensorFlow - CIFAR-10 Classification" /><published>2017-12-31T10:00:24+00:00</published><updated>2017-12-31T10:00:24+00:00</updated><id>http://localhost:4444/neural%20networks/2017/12/31/Two-layer-cnn-cifar-10</id><content type="html" xml:base="http://localhost:4444/neural%20networks/2017/12/31/Two-layer-cnn-cifar-10.html">&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
 As I’ve spent quite a bit of time demonstrating raw convnets on the MNIST dataset. I thought I’d mix things up quickly and wizz through an implementation of a 2 layer convolutional neural network and train it on  the CIFAR-10 dataset.&lt;/p&gt;
@@ -207,7 +207,7 @@ with tf.Session() as sess:
 
 &lt;p&gt;In this post i will implement a CNN using just numpy.&lt;/p&gt;
 
-&lt;p&gt;The code does run and is verified as working correctly.. &lt;strong&gt;however the backpropagation is completely Naieve, unoptimised.. and for illustrative purposes only. It will take far too long to run on any real data.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;The code does run and is verified as working correctly.. &lt;strong&gt;however the backpropagation is completely naive, unoptimised.. and for illustrative purposes only. It will take far too long to run on any real data.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Once again, The code is available from my Github and I’ll do my best to keep it in a single file and explain as much as possible.&lt;/p&gt;
 
@@ -257,9 +257,9 @@ with tf.Session() as sess:
 
 &lt;h2 id=&quot;step-1-data-and-preprocessing&quot;&gt;Step 1: Data and Preprocessing&lt;/h2&gt;
 
-&lt;p&gt;The data we have contains the raw pixel values for the images we need however in the above you notice that the array needed to be reshaped in order to display the image according to its actual visual representation.&lt;/p&gt;
+&lt;p&gt;The data we have contains the raw pixel values for the images we need, however in the above you notice that the array needed to be reshaped in order to display the image according to its actual visual representation.&lt;/p&gt;
 
-&lt;p&gt;Currently the train images exist in a 2d vector of shape 6000 * 784 however CNN’s attempt to interpret not only pixel values but the spacial relationships that exist within a given image. This means that in order to make this data suitable for input to the CNN we need to input each image as a 28 * 28 dimensional array. The 28 * 28 pixels refer to the width and height (in pixels) of each image, that is the number of elements in each row and column of the matrix.&lt;/p&gt;
+&lt;p&gt;Currently the training images exist in a 2d vector of shape 6000 * 784 however CNN’s attempt to interpret not only pixel values, but the spacial relationships that exist within a given image. This means that in order to make this data suitable for input to the CNN we need to input each image as a 28 * 28 dimensional array. The 28 * 28 pixels refer to the width and height (in pixels) of each image, that is the number of elements in each row and column of the matrix.&lt;/p&gt;
 
 &lt;p&gt;The conversion is done below.&lt;/p&gt;
 
@@ -306,11 +306,11 @@ You can see below that we are able to display the images without needing to resh
 
 &lt;p&gt;Because we have more than one filter at each convolutional layer, at this stage we are essentially multiplying our (image) Matrix of 28 * 28 with a Matrix of n * 5 * 5 (using 5 as a typical filter size).&lt;/p&gt;
 
-&lt;p&gt;As we know we cannot multiply a 2d matrix by a 3d matrix so we need to explicitly define the dimensions of the third channel in the input image.&lt;/p&gt;
+&lt;p&gt;As we know, we cannot multiply a 2d matrix by a 3d matrix so we need to explicitly define the dimensions of the third channel in the input image.&lt;/p&gt;
 
-&lt;p&gt;If our digit images were RGB format, and had dimensions of 3 * 28 * 28, the original 28 * 28 would still corrispond to the dimensions (number of pixels) across the width and height of the image. We would also have a third parameter the ‘3’ in this instance to refer to each colour channel. The colour channels RGB or red, green and blue will have differing intensities depending on how much of that colour is desplaed at each particular pixel location.&lt;/p&gt;
+&lt;p&gt;If our digit images were RGB format, and had dimensions of 3 * 28 * 28, those 28 * 28 pixels would still corrispond to locations across the width and height of the image. We would also have a third parameter the ‘3’ in this instance to refer to each colour channel. The colour channels RGB or red, green and blue will have differing intensities depending on how much of that colour is displayed at each particular pixel location.&lt;/p&gt;
 
-&lt;p&gt;Once we have explicitly defined our matrix dimensions convolution involves taking each filter and placing it at every spacial location of the input image and computing the product itself and each of the pixels that it overlays. This is done at each spacial location across all chanels of the image.&lt;/p&gt;
+&lt;p&gt;Once we have explicitly defined our matrix dimensions they will suitable for convolution in our model. Convolution involves taking each filter and placing it at every spacial location of the input image, in order to compute the product itself and each of the pixels that it overlays. This is done at each spacial location across all chanels of the image.&lt;/p&gt;
 
 &lt;p&gt;We will add the aditional dimension to our images below:&lt;/p&gt;
 
@@ -319,7 +319,7 @@ You can see below that we are able to display the images without needing to resh
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h2 id=&quot;step-3-define-network-model-graph&quot;&gt;Step 3: Define network model (graph)&lt;/h2&gt;
 
-&lt;p&gt;The graph has two convolutional layers seporated by a reLU activation. Following the second convolutional layer, there is a fully connected layer which is essentiall a ‘normal’ two layer neural network.
+&lt;p&gt;The graph has two convolutional layers separated by a ReLU activation. Following the second convolutional layer, there is a fully connected layer which is essentially a ‘normal’ two layer neural network.
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h3 id=&quot;structure&quot;&gt;&lt;strong&gt;Structure&lt;/strong&gt;&lt;/h3&gt;
 
@@ -343,11 +343,11 @@ You can see below that we are able to display the images without needing to resh
     &lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;fc_W2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;weight_scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num_classes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
     &lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;fc_b2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Lets breakdown the structure based on the valuees above.
+&lt;p&gt;Lets breakdown the structure based on the values above.
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h4 id=&quot;convolutional-layers&quot;&gt;&lt;strong&gt;&lt;em&gt;Convolutional Layers&lt;/em&gt;&lt;/strong&gt;&lt;/h4&gt;
 &lt;p&gt;The input to the first convolution layer if we have just 2 input images is (2 * 1 * 28 * 28)
-Thats:&lt;/p&gt;
+That is:&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;Two images&lt;/li&gt;
   &lt;li&gt;Each with a single colour channel (greyscale)&lt;/li&gt;
@@ -372,8 +372,7 @@ and the output for that filter is the summation of the product of each of the ch
 
 &lt;p&gt;Each filter is also multiplied by a bias term.&lt;/p&gt;
 
-&lt;p&gt;I dont want to go too deeply into convolution because the purpose of this is to delve into the code but :fdsfas
-&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h4 id=&quot;fully-connected-layers&quot;&gt;&lt;strong&gt;&lt;em&gt;Fully Connected Layers&lt;/em&gt;&lt;/strong&gt;&lt;/h4&gt;
 &lt;p&gt;Being an ‘Ordinary’ Neural network the fully connected layers do not take a 2d input. 
 A normal Neural Network takes its input as a long vector so we need to reshape &lt;strong&gt;EACH&lt;/strong&gt; image into a single vector.&lt;/p&gt;
@@ -591,7 +590,7 @@ we also create a placeholder for our filter values, the shape is that of the ori
         &lt;span class=&quot;c1&quot;&gt;##&lt;/span&gt;
         &lt;span class=&quot;c1&quot;&gt;## update weights and bias' here&lt;/span&gt;
         &lt;span class=&quot;c1&quot;&gt;##&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><category term="Neural Networks" /><summary type="html">I recently did an implementation of a single layer Neural Network with backprop to classify the MNIST dataset</summary></entry><entry><title type="html">A quick demo of Pandas with Music4ML</title><link href="http://localhost:4444/data%20science/2017/12/28/music4pandas.html" rel="alternate" type="text/html" title="A quick demo of Pandas with Music4ML " /><published>2017-12-28T19:00:24+00:00</published><updated>2017-12-28T19:00:24+00:00</updated><id>http://localhost:4444/data%20science/2017/12/28/music4pandas</id><content type="html" xml:base="http://localhost:4444/data%20science/2017/12/28/music4pandas.html">&lt;p&gt;&lt;br /&gt;&lt;br /&gt;
-The Music4ML dataset contains a csv and an sqlite3.db file for your consumption. So in this post i thought id provide some insight on how to consume and the data with pandas.&lt;/p&gt;
+The Music4ML dataset contains a csv and an sqlite3.db file for your consumption. So in this post I thought i’d provide some insight on how to consume and the data with pandas.&lt;/p&gt;
 
 &lt;p&gt;The CSV file can be imported using pandas natve read_csv command as shown below&lt;/p&gt;
 
@@ -632,11 +631,11 @@ pd.read_csv('lyrics_data.csv')
 &lt;/div&gt;
 
 &lt;h2 id=&quot;as-i-proceed-with-my-latest-nlp-project-ill-continue-to-post-snippets-and-updates&quot;&gt;As I proceed with my latest NLP project I’ll continue to post snippets and updates…&lt;/h2&gt;
-&lt;h1 id=&quot;enjoy-the-new-year&quot;&gt;Enjoy the new year!&lt;/h1&gt;</content><author><name></name></author><category term="Data Science" /><summary type="html">The Music4ML dataset contains a csv and an sqlite3.db file for your consumption. So in this post i thought id provide some insight on how to consume and the data with pandas.</summary></entry><entry><title type="html">Two layer NN - Numpy Implementation - MNIST Classifier</title><link href="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html" rel="alternate" type="text/html" title="Two layer NN - Numpy Implementation - MNIST Classifier" /><published>2017-12-28T19:00:24+00:00</published><updated>2017-12-28T19:00:24+00:00</updated><id>http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn</id><content type="html" xml:base="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html">&lt;p&gt;&lt;strong&gt;When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&quot;enjoy-the-new-year&quot;&gt;Enjoy the new year!&lt;/h1&gt;</content><author><name></name></author><category term="Data Science" /><summary type="html">The Music4ML dataset contains a csv and an sqlite3.db file for your consumption. So in this post I thought i’d provide some insight on how to consume and the data with pandas.</summary></entry><entry><title type="html">Two layer NN - Numpy Implementation - MNIST Classifier</title><link href="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html" rel="alternate" type="text/html" title="Two layer NN - Numpy Implementation - MNIST Classifier" /><published>2017-12-28T19:00:24+00:00</published><updated>2017-12-28T19:00:24+00:00</updated><id>http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn</id><content type="html" xml:base="http://localhost:4444/neural%20networks/2017/12/28/two-layer-nn.html">&lt;p&gt;&lt;strong&gt;When I first got started with machine learning tensorFlow didnt exist! (at least publicly)&lt;/strong&gt;&lt;/p&gt;
 
-&lt;p&gt;When I was completing my masters all equations and transformations had to be intimately understood in order to form any kind of working implementation of a machine learning algorithm.&lt;/p&gt;
+&lt;p&gt;When I was completing my masters, all equations and transformations had to be intimately understood, in order to form any kind of working implementation of a machine learning algorithm.&lt;/p&gt;
 
-&lt;p&gt;TensorFlow is a great tool and im glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.&lt;/p&gt;
+&lt;p&gt;TensorFlow is a great tool and i’m glad it exists now, however I really do believe that to be the best at machine learning, you need to understand whats going on under the hood.&lt;/p&gt;
 
 &lt;p&gt;While I dont plan to go into the mathematics here, in this post I will create a simple 2 layer neural network (with backprop) and use it to classify the MNIST dataset. In order to give some intuition as to what is going on behind the scenes with tensorflow.&lt;/p&gt;
 
@@ -652,11 +651,14 @@ I’ll do my best to keep it in a single file and explain as much as possible.&l
 &lt;span class=&quot;n&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;matplotlib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;pyplot&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt; 
 &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;matplotlib&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inline&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;These are all the libraries we will be using for today.
-The mnist library allows us to extract the MNIST dataset from the zipped files 
-Numpy is the de-facto standard for Machine Learning “tensor” (vector) manipulation.
-MatplotLib will allow us to visualise our data
-The last line simply tells us to display our plots inline&lt;/p&gt;
+&lt;p&gt;These are all the libraries we will be using for today.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;The &lt;strong&gt;mnist&lt;/strong&gt; library allows us to extract the MNIST dataset from the zipped files.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Numpy&lt;/strong&gt; is the de-facto standard for Machine Learning “tensor” (vector) manipulation.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;MatplotLib&lt;/strong&gt; will allow us to visualise our data.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The last line simply tells us to display our plots inline&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;MNIST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../data'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;train_images&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;train_labels&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;load_training&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
@@ -727,13 +729,16 @@ The last line simply tells us to display our plots inline&lt;/p&gt;
 
 &lt;p&gt;OK.. ready..&lt;/p&gt;
 
-&lt;p&gt;first things first we create a class to encapsulate our model and its parameters, ive called it NNModel (Neural Network Model).&lt;/p&gt;
+&lt;p&gt;first things first, we create a class to encapsulate our model and its parameters, i’ve called it NNModel (Neural Network Model).&lt;/p&gt;
 
-&lt;p&gt;This model take 3 initialization parametars:
-input_sz - the number of input images in the current batch for (10000 for test batch)
-hidden_sz - the number of neurones in the hidden layer
-output_sz - the number of classes to map to
-&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;This model take 3 initialization parametars:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;input_sz&lt;/strong&gt; - the number of input images in the current batch for (10000 for test batch)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;hidden_sz&lt;/strong&gt; - the number of neurones in the hidden layer&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;output_sz&lt;/strong&gt; - the total number of classes that we can mapp to
+&lt;br /&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
 	&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;input_sz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hidden_sz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output_sz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;weightInitFcn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -741,13 +746,15 @@ output_sz - the number of classes to map to
        	&lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;b1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;output_sz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;&lt;br /&gt;
-within the initialization class we initialize the weights W1 and the bias B1 as parameters, making them class variables using the ‘self.’ prefix.&lt;/p&gt;
+In the initialization class abovewe initialize the weights W1 and the bias b1 as parameters, making them class variables using the ‘self.’ prefix.&lt;/p&gt;
 
-&lt;p&gt;*W1 is 2d matrix with dimensions [input_sz * output_sz]
-*b1 is 1d column vector of length output_sz&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;W1&lt;/strong&gt; is 2d matrix with dimensions [input_sz * output_sz]&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;b1&lt;/strong&gt; is 1d column vector of length output_sz&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;The calc_loss method is going to hold the bulk of our ML logic,
-for brevity and out of laziness, I’ve put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.&lt;/p&gt;
+for brevity, I’ve put the forward and backward pass within the same function. You would definitely factor these steps out in commercial code or a larger network.&lt;/p&gt;
 
 &lt;p&gt;Lets look at the forward pass first:&lt;/p&gt;
 
@@ -757,7 +764,7 @@ for brevity and out of laziness, I’ve put the forward and backward pass within
     &lt;span class=&quot;n&quot;&gt;scores&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;W1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;b1&lt;/span&gt;
         &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Very simply, we take x and calculate the dot product between it and out weights matrix initialised earlier, we then add the bias to ths to produce a1.
+&lt;p&gt;Very simply, we take x and calculate the dot product between it and the weights matrix initialised earlier, we then add the bias to ths to produce a1.
 a1 is essentially our best guess, given each image, of what number this image depicts (which class 0-9 it belongs to)&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
@@ -775,7 +782,7 @@ a1 is essentially our best guess, given each image, of what number this image de
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e_scores&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e_scores&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keepdims&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;&lt;br /&gt;
-The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probabiility because all values are positive and together sum to 1.&lt;/p&gt;
+The softmax function takes our uncorrelated scores and converts them into a probability distribution over all classes, its considered a probability because all values are positive and together sum to 1.&lt;/p&gt;
 
 &lt;p&gt;Next we calculate the cross entropy loss with respect to our data.
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
@@ -785,10 +792,10 @@ The softmax function takes our uncorrelated scores and converts them into a prob
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;probs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;&lt;br /&gt;
-The &lt;strong&gt;Cross entropy&lt;/strong&gt; loss is defined as the negative log likelihood [[MORE]]&lt;/p&gt;
+The &lt;strong&gt;Cross entropy&lt;/strong&gt; loss also known as the negative log likelihood, is used to measure the (dis)similarity between the true class and the predicted class.&lt;/p&gt;
 
-&lt;p&gt;once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
-This is so called ‘L2 Regularization’ and essentially means that if the same function is represented by a higher order and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm, which is in turn added to the overall loss, the lower order function will be prefered.&lt;/p&gt;
+&lt;p&gt;Once we have defined our data loss we include a regularization term in order to try and coherse our function to favour simpler (lower order) predictions.
+This is so called ‘L2 Regularization’. It essentially means that if the same function is represented by a higher and a lower order equation, due to the magnitude of the higher order function having a greater L2 norm (which is in turn added to the overall loss), the lower order function will be prefered.&lt;/p&gt;
 
 &lt;p&gt;The loss calculation section of our forward pass is shown below
 &lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
@@ -803,7 +810,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h4 id=&quot;42---backpropagation&quot;&gt;&lt;strong&gt;4.2 - Backpropagation&lt;/strong&gt;&lt;/h4&gt;
 
-&lt;p&gt;Finally we need to backpropagate in order to update our weights and adjust them such that the next time we make a prediction, it will slightly better than what we have estimated previously.&lt;/p&gt;
+&lt;p&gt;Finally, we need to backpropagate in order to update and adjust our weights. This means that the next time we make a prediction, it will be slightly better than what we have estimated previously.&lt;/p&gt;
 
 &lt;p&gt;In order to do this we need to understand how much effect each value used, at each stage of our forward pass, had on our final outcome. Once we know this we can adjust these values in a way that will minimise the loss incurred.&lt;/p&gt;
 
@@ -820,7 +827,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 &lt;p&gt;Because we only have one set of weights, really we only need to calculate the loss with respect to self.W1 and self.b1, however if this network were any deeper we would use the loss with respect to x as a parameter to calculate the loss with respect to earlier layers.&lt;/p&gt;
 
-&lt;p&gt;The process of finding calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.&lt;/p&gt;
+&lt;p&gt;The process of calculating the derivative of the loss with respect to the set of parameters, and using that derivative iteratively to minimise future losses is called Gradient Descent.&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h2 id=&quot;step-5-train-our-model&quot;&gt;Step 5: Train our model!&lt;/h2&gt;
@@ -853,7 +860,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 &lt;p&gt;Instead of trying to update all the weights of all the samples in what could be a dataset of millions of points we perform ‘stocastic’ gradient descent. Where we take a random subset of the samples and adjust the weights based on the results of our predictions on this subset.&lt;/p&gt;
 
-&lt;p&gt;Each subset is called a batch, you can see that we pass a batch of images and its corrisponding labels to the calc_loss function and based on those results we update our weights.&lt;/p&gt;
+&lt;p&gt;Each subset is called a batch, you can see that we pass a batch of images and its corresponding labels to the calc_loss function and based on those results we update our weights.&lt;/p&gt;
 
 &lt;p&gt;We are returning our loss as well as the gradient so that we can plot our loss per iteration on a graph and make inferences based on its shape.&lt;/p&gt;
 
@@ -862,7 +869,7 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 &lt;p&gt;Once we’ve finished training our model we use the predict function, on our test dataset to see how accurately we can predict each example image.&lt;/p&gt;
 
-&lt;p&gt;The code below runs performs training and test on the model defined above, the outcome is shown in the plot below.&lt;/p&gt;
+&lt;p&gt;The code below performs training and test on the model defined above, the outcome is shown in the plot below.&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;c1&quot;&gt;#use model on dataset&lt;/span&gt;
 
@@ -895,13 +902,13 @@ This is so called ‘L2 Regularization’ and essentially means that if the same
 
 &lt;p&gt;&lt;img src=&quot;/images/img/2017/12/error-per-iteration.png&quot; alt=&quot;graph&quot; /&gt;&lt;/p&gt;
 
-&lt;h4 id=&quot;this-simple-model-is-able-to-achieve-around-90-accuracy&quot;&gt;This simple model is able to achieve around 90% accuracy!&lt;/h4&gt;</content><author><name></name></author><category term="Neural Networks" /><summary type="html">When I first got started with machine learning tensorFlow didnt exist! (at least pubicly)</summary></entry><entry><title type="html">Music 4 ML!</title><link href="http://localhost:4444/i%20had%20some%20spare%20time/2017/12/28/seasons-greetings.html" rel="alternate" type="text/html" title="Music 4 ML!" /><published>2017-12-28T18:50:24+00:00</published><updated>2017-12-28T18:50:24+00:00</updated><id>http://localhost:4444/i%20had%20some%20spare%20time/2017/12/28/seasons-greetings</id><content type="html" xml:base="http://localhost:4444/i%20had%20some%20spare%20time/2017/12/28/seasons-greetings.html">&lt;p&gt;Happy New Year everybody!&lt;/p&gt;
+&lt;h4 id=&quot;this-simple-model-is-able-to-achieve-around-90-accuracy&quot;&gt;This simple model is able to achieve around 90% accuracy!&lt;/h4&gt;</content><author><name></name></author><category term="Neural Networks" /><summary type="html">When I first got started with machine learning tensorFlow didnt exist! (at least publicly)</summary></entry><entry><title type="html">Music 4 ML!</title><link href="http://localhost:4444/i%20had%20some%20spare%20time/2017/12/28/seasons-greetings.html" rel="alternate" type="text/html" title="Music 4 ML!" /><published>2017-12-28T18:50:24+00:00</published><updated>2017-12-28T18:50:24+00:00</updated><id>http://localhost:4444/i%20had%20some%20spare%20time/2017/12/28/seasons-greetings</id><content type="html" xml:base="http://localhost:4444/i%20had%20some%20spare%20time/2017/12/28/seasons-greetings.html">&lt;p&gt;Happy New Year everybody!&lt;/p&gt;
 
 &lt;p&gt;I had a bit of time over Christmas and decided to get started with an NLP project that’s been in my head for some time.&lt;/p&gt;
 
 &lt;p&gt;One of the reasons I hadn’t started is because there is no dataset that I could find that contains Song Lyrics, Genre, Artist Name and Year of release in one set. It was also important to me that the Lyrics came only came from ‘popular’ songs. Therefore the lyrics included in this dataset are from the top 100 albums from the 70’s 80’s 90’s and 00’s.&lt;/p&gt;
 
-&lt;p&gt;In addition to that I’ve added and extra helping of Hip-Hop albums into the Mix because it was very underrepresented before the late 90’s.&lt;/p&gt;
+&lt;p&gt;In addition to that I’ve added an extra helping of Hip-Hop albums into the Mix because it was very underrepresented before the late 90’s.&lt;/p&gt;
 
 &lt;p&gt;The Dataset is provided in a .csv format and also an sqlite3.db file.&lt;/p&gt;
 
